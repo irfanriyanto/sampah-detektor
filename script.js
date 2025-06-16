@@ -12,7 +12,7 @@ async function init() {
     model = await tmImage.load(modelURL, metadataURL);
     console.log("Model berhasil dimuat.");
 
-    webcam = new tmImage.Webcam(300, 225, true);
+    webcam = new tmImage.Webcam(224, 224, true);
     console.log("Menyiapkan webcam...");
     await webcam.setup();
     console.log("Webcam siap.");
