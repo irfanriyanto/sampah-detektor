@@ -10,15 +10,14 @@
         {
           "class_name": "InputLayer",
           "config": {
-            "batch_input_shape": [null, 224, 224, 3],
+            "batch_input_shape": [
+              null,
+              224,
+              224,
+              3
+            ],
             "dtype": "float32",
             "name": "input_1"
-          }
-        },
-        {
-          "class_name": "Flatten",
-          "config": {
-            "name": "flatten_1"
           }
         },
         {
@@ -42,12 +41,40 @@
   },
   "weightsManifest": [
     {
-      "paths": ["weights.bin"],
+      "paths": [
+        "weights.bin"
+      ],
       "weights": [
-        { "name": "dense_1/kernel", "shape": [150528, 128], "dtype": "float32" },
-        { "name": "dense_1/bias", "shape": [128], "dtype": "float32" },
-        { "name": "output/kernel", "shape": [128, 3], "dtype": "float32" },
-        { "name": "output/bias", "shape": [3], "dtype": "float32" }
+        {
+          "name": "dense_1/kernel",
+          "shape": [
+            150528,
+            128
+          ],
+          "dtype": "float32"
+        },
+        {
+          "name": "dense_1/bias",
+          "shape": [
+            128
+          ],
+          "dtype": "float32"
+        },
+        {
+          "name": "output/kernel",
+          "shape": [
+            128,
+            3
+          ],
+          "dtype": "float32"
+        },
+        {
+          "name": "output/bias",
+          "shape": [
+            3
+          ],
+          "dtype": "float32"
+        }
       ]
     }
   ],
