@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -7,10 +7,16 @@
 </head>
 <body>
   <h1>Deteksi Sampah Organik vs Nonorganik</h1>
-  <div id="webcam"></div>
+  <video id="webcam" autoplay playsinline width="300" height="225"></video>
   <div id="label">Menunggu deteksi...</div>
 
+  <!-- Tambahkan TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+
+  <!-- Teachable Machine -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+
+  <!-- Script Utama -->
   <script src="script.js"></script>
 </body>
 </html>
