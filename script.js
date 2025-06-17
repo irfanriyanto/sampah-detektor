@@ -1,88 +1,103 @@
 const URL = "./model/";
-let model, webcamStream, labelContainer;
-let useFrontCamera = true;
+let model, webcam, labelContainer;
+let currentCamera = 0;
 
-async function init() {
-  try {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-    model = await tmImage.load(modelURL, metadataURL);
-
-    labelContainer = document.getElementById("label");
-
-    await setupCamera();
-    window.requestAnimationFrame(loop);
-  } catch (error) {
-    console.error("Gagal memulai aplikasi:", error);
-    document.getElementById("label").innerText = "Gagal memuat model atau kamera.";
+const explanations = {
+  "Sampah Organik": {
+    alasan: "Sampah ini berasal dari sisa makhluk hidup seperti daun, buah, atau makanan.",
+    manfaat: "Dapat diolah menjadi kompos atau pupuk organik.",
+    pengolahan: "Dikomposkan dalam lubang atau wadah tertutup.",
+    dampak: "Positif: menyuburkan tanah. Negatif: jika tidak diolah, menyebabkan bau dan lalat."
+  },
+  "Sampah Nonorganik": {
+    alasan: "Berasal dari bahan non-hayati seperti plastik, logam, atau kaca.",
+    manfaat: "Dapat didaur ulang menjadi barang baru.",
+    pengolahan: "Dikumpulkan dan dikirim ke tempat daur ulang.",
+    dampak: "Positif: mengurangi penebangan pohon. Negatif: mencemari tanah jika dibuang sembarangan."
   }
+};
+
+async function loadModel() {
+  const modelURL = URL + "model.json";
+  const metadataURL = URL + "metadata.json";
+  model = await tmImage.load(modelURL, metadataURL);
 }
 
-async function setupCamera() {
-  const constraints = {
-    audio: false,
-    video: {
-      facingMode: useFrontCamera ? "user" : "environment",
-      width: 224,
-      height: 224
-    }
-  };
-
-  const video = document.getElementById("webcam");
-
-  if (webcamStream) {
-    webcamStream.getTracks().forEach(track => track.stop());
-  }
-
-  webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
-  video.srcObject = webcamStream;
-
-  return new Promise(resolve => {
-    video.onloadedmetadata = () => {
-      video.play();
-      resolve();
-    };
-  });
+function startCameraMode() {
+  document.getElementById("mode-selection").style.display = "none";
+  document.getElementById("cameraMode").style.display = "block";
+  initCamera();
 }
 
-async function loop() {
-  await predict();
+function startUploadMode() {
+  document.getElementById("mode-selection").style.display = "none";
+  document.getElementById("uploadMode").style.display = "block";
+  loadModel();
+}
+
+async function initCamera() {
+  await loadModel();
+  webcam = new tmImage.Webcam(224, 224, true);
+  await webcam.setup({ facingMode: currentCamera === 0 ? "environment" : "user" });
+  await webcam.play();
+  document.getElementById("preview").appendChild(webcam.canvas);
   window.requestAnimationFrame(loop);
 }
 
-async function predict() {
-  const video = document.getElementById("webcam");
-  if (video.readyState === 4) {
-    const prediction = await model.predict(video);
-    const result = prediction.sort((a, b) => b.probability - a.probability)[0];
-    labelContainer.innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
+function switchCamera() {
+  currentCamera = currentCamera === 0 ? 1 : 0;
+  if (webcam) {
+    webcam.stop();
+    document.getElementById("preview").innerHTML = "";
   }
+  initCamera();
 }
 
-async function switchCamera() {
-  useFrontCamera = !useFrontCamera;
-  await setupCamera();
+async function loop() {
+  webcam.update();
+  await predictFromCamera();
+  window.requestAnimationFrame(loop);
 }
 
-async function handleImageUpload(event) {
-  const imgElement = document.getElementById("uploadedImage");
-  const file = event.target.files[0];
+async function predictFromCamera() {
+  const prediction = await model.predict(webcam.canvas);
+  const result = prediction.sort((a, b) => b.probability - a.probability)[0];
+  document.getElementById("cameraLabel").innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
+  displayExplanation(result.className, "cameraExplanation");
+}
 
+function handleUpload(input) {
+  const file = input.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function (e) {
-    imgElement.src = e.target.result;
-    imgElement.style.display = "block";
-
-    imgElement.onload = async () => {
-      const prediction = await model.predict(imgElement);
+    const img = new Image();
+    img.onload = async function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = 224;
+      canvas.height = 224;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 224, 224);
+      document.getElementById("uploadPreview").src = e.target.result;
+      const prediction = await model.predict(canvas);
       const result = prediction.sort((a, b) => b.probability - a.probability)[0];
-      labelContainer.innerText = `Hasil Gambar: ${result.className} (${(result.probability * 100).toFixed(1)}%)`;
+      document.getElementById("uploadLabel").innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
+      displayExplanation(result.className, "uploadExplanation");
     };
+    img.src = e.target.result;
   };
-
   reader.readAsDataURL(file);
 }
 
-init();
+function displayExplanation(className, containerId) {
+  const data = explanations[className];
+  document.getElementById(containerId).innerHTML = `
+    <strong>Penjelasan:</strong><br>
+    <b>Jenis:</b> ${className}<br>
+    <b>Alasan:</b> ${data.alasan}<br>
+    <b>Manfaat:</b> ${data.manfaat}<br>
+    <b>Pengolahan:</b> ${data.pengolahan}<br>
+    <b>Dampak:</b> ${data.dampak}
+  `;
+}
