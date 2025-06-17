@@ -1,29 +1,16 @@
 const URL = "./model/";
-let model, webcam, labelContainer;
+let model, webcamStream, labelContainer;
+let useFrontCamera = true;
 
 async function init() {
   try {
-    console.log("Memulai inisialisasi...");
-
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
-
-    console.log("Memuat model dari:", modelURL);
     model = await tmImage.load(modelURL, metadataURL);
-    console.log("Model berhasil dimuat.");
-
-    webcam = new tmImage.Webcam(224, 224, true);
-    console.log("Menyiapkan webcam...");
-    await webcam.setup();
-    console.log("Webcam siap.");
-
-    await webcam.play();
-    console.log("Webcam berjalan.");
-
-    document.getElementById("webcam").appendChild(webcam.canvas);
-    console.log("Canvas webcam ditambahkan ke DOM.");
 
     labelContainer = document.getElementById("label");
+
+    await setupCamera();
     window.requestAnimationFrame(loop);
   } catch (error) {
     console.error("Gagal memulai aplikasi:", error);
@@ -31,21 +18,71 @@ async function init() {
   }
 }
 
+async function setupCamera() {
+  const constraints = {
+    audio: false,
+    video: {
+      facingMode: useFrontCamera ? "user" : "environment",
+      width: 224,
+      height: 224
+    }
+  };
+
+  const video = document.getElementById("webcam");
+
+  if (webcamStream) {
+    webcamStream.getTracks().forEach(track => track.stop());
+  }
+
+  webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+  video.srcObject = webcamStream;
+
+  return new Promise(resolve => {
+    video.onloadedmetadata = () => {
+      video.play();
+      resolve();
+    };
+  });
+}
+
 async function loop() {
-  webcam.update();
   await predict();
   window.requestAnimationFrame(loop);
 }
 
 async function predict() {
-  try {
-    const prediction = await model.predict(webcam.canvas);
+  const video = document.getElementById("webcam");
+  if (video.readyState === 4) {
+    const prediction = await model.predict(video);
     const result = prediction.sort((a, b) => b.probability - a.probability)[0];
     labelContainer.innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
-    console.log("Prediksi:", result);
-  } catch (error) {
-    console.error("Gagal melakukan prediksi:", error);
   }
+}
+
+async function switchCamera() {
+  useFrontCamera = !useFrontCamera;
+  await setupCamera();
+}
+
+async function handleImageUpload(event) {
+  const imgElement = document.getElementById("uploadedImage");
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    imgElement.src = e.target.result;
+    imgElement.style.display = "block";
+
+    imgElement.onload = async () => {
+      const prediction = await model.predict(imgElement);
+      const result = prediction.sort((a, b) => b.probability - a.probability)[0];
+      labelContainer.innerText = `Hasil Gambar: ${result.className} (${(result.probability * 100).toFixed(1)}%)`;
+    };
+  };
+
+  reader.readAsDataURL(file);
 }
 
 init();
