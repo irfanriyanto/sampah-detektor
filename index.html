@@ -10,6 +10,19 @@
   <video id="webcam" autoplay playsinline width="300" height="225"></video>
   <div id="label">Menunggu deteksi...</div>
 
+<div style="text-align:center">
+  <h1>Deteksi Sampah Organik vs Nonorganik</h1>
+  <div id="webcam-container">
+    <video id="webcam" autoplay playsinline width="224" height="224"></video>
+  </div>
+  <div>
+    <button onclick="switchCamera()">Ganti Kamera</button>
+    <input type="file" accept="image/*" onchange="handleImageUpload(event)">
+  </div>
+  <div id="label" style="margin-top: 20px; font-weight: bold;"></div>
+  <img id="uploadedImage" style="display:none; max-width:224px; margin-top:20px;" />
+</div>
+
   <!-- Tambahkan TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
 
