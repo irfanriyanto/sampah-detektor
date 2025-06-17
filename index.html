@@ -2,14 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Sampah Detektor</title>
+  <title>Deteksi Sampah Organik vs Nonorganik</title>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <script defer src="script.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; background-color: #f3f3f3; }
+    body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
     button { margin: 10px; padding: 10px 20px; font-size: 16px; }
-    #preview img, #preview canvas { width: 224px; height: 224px; margin: 10px auto; }
-    #result { font-weight: bold; margin-top: 20px; }
+    #preview img, #preview canvas, video { width: 224px; height: 224px; margin: 10px auto; }
+    #result { margin-top: 20px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -18,7 +18,7 @@
   <div id="menu">
     <button onclick="startCamera()">Gunakan Kamera</button>
     <button onclick="document.getElementById('uploadInput').click()">Unggah Gambar</button>
-    <input type="file" accept="image/*" id="uploadInput" onchange="handleUpload(event)" style="display:none;">
+    <input type="file" accept="image/*" id="uploadInput" style="display:none">
   </div>
 
   <div id="preview"></div>
