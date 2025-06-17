@@ -3,28 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Deteksi Sampah Organik vs Nonorganik</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <script defer src="script.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
-    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
-    #preview img, #preview canvas, video { width: 224px; height: 224px; margin: 10px auto; }
-    #result { margin-top: 20px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #preview img, #preview canvas, video {
+      width: 224px;
+      height: 224px;
+      margin: 10px auto;
+      border: 2px solid #ccc;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #label {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
   <h2>Deteksi Sampah Organik vs Nonorganik</h2>
 
+  <!-- Menu Pilihan -->
   <div id="menu">
     <button onclick="startCamera()">Gunakan Kamera</button>
     <button onclick="document.getElementById('uploadInput').click()">Unggah Gambar</button>
-    <input type="file" accept="image/*" id="uploadInput" style="display:none">
+    <input type="file" accept="image/*" id="uploadInput" style="display: none;">
   </div>
 
-  <div id="preview"></div>
+  <!-- Preview Gambar atau Kamera -->
+  <div id="preview">
+    <div id="webcam"></div> <!-- penting untuk webcam -->
+  </div>
+
+  <!-- Hasil Prediksi -->
   <div id="label"></div>
   <div id="result"></div>
 
-  <button onclick="switchCamera()" id="switchBtn" style="display:none;">Ganti Kamera</button>
+  <!-- Tombol Ganti Kamera -->
+  <button onclick="switchCamera()" id="switchBtn" style="display: none;">Ganti Kamera</button>
 </body>
 </html>
