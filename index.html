@@ -1,35 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Deteksi Sampah</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Deteksi Sampah Organik vs Nonorganik</title>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script defer src="script.js"></script>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f2f2f2; }
+    h1 { margin-top: 20px; }
+    #preview, #uploadPreview { margin: 20px auto; max-width: 100%; }
+    button, input[type="file"] { margin: 10px; }
+    .description { margin-top: 15px; padding: 10px; background: white; border-radius: 10px; display: inline-block; max-width: 90%; text-align: left; }
+  </style>
 </head>
 <body>
   <h1>Deteksi Sampah Organik vs Nonorganik</h1>
-  <video id="webcam" autoplay playsinline width="300" height="225"></video>
-  <div id="label">Menunggu deteksi...</div>
-
-<div style="text-align:center">
-  <h1>Deteksi Sampah Organik vs Nonorganik</h1>
-  <div id="webcam-container">
-    <video id="webcam" autoplay playsinline width="224" height="224"></video>
+  
+  <div id="mode-selection">
+    <button onclick="startCameraMode()">Gunakan Kamera</button>
+    <button onclick="startUploadMode()">Unggah Gambar</button>
   </div>
-  <div>
+
+  <div id="cameraMode" style="display:none;">
+    <div id="preview"></div>
     <button onclick="switchCamera()">Ganti Kamera</button>
-    <input type="file" accept="image/*" onchange="handleImageUpload(event)">
+    <p id="cameraLabel"></p>
+    <div class="description" id="cameraExplanation"></div>
   </div>
-  <div id="label" style="margin-top: 20px; font-weight: bold;"></div>
-  <img id="uploadedImage" style="display:none; max-width:224px; margin-top:20px;" />
-</div>
 
-  <!-- Tambahkan TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
-
-  <!-- Teachable Machine -->
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-
-  <!-- Script Utama -->
-  <script src="script.js"></script>
+  <div id="uploadMode" style="display:none;">
+    <input type="file" accept="image/*" onchange="handleUpload(this)">
+    <br>
+    <img id="uploadPreview" />
+    <p id="uploadLabel"></p>
+    <div class="description" id="uploadExplanation"></div>
+  </div>
 </body>
 </html>
