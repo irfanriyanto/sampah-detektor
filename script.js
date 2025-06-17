@@ -1,103 +1,85 @@
 const URL = "./model/";
-let model, webcam, labelContainer;
-let currentCamera = 0;
-
-const explanations = {
-  "Sampah Organik": {
-    alasan: "Sampah ini berasal dari sisa makhluk hidup seperti daun, buah, atau makanan.",
-    manfaat: "Dapat diolah menjadi kompos atau pupuk organik.",
-    pengolahan: "Dikomposkan dalam lubang atau wadah tertutup.",
-    dampak: "Positif: menyuburkan tanah. Negatif: jika tidak diolah, menyebabkan bau dan lalat."
-  },
-  "Sampah Nonorganik": {
-    alasan: "Berasal dari bahan non-hayati seperti plastik, logam, atau kaca.",
-    manfaat: "Dapat didaur ulang menjadi barang baru.",
-    pengolahan: "Dikumpulkan dan dikirim ke tempat daur ulang.",
-    dampak: "Positif: mengurangi penebangan pohon. Negatif: mencemari tanah jika dibuang sembarangan."
-  }
-};
+let model, webcam, currentStream, useFrontCamera = true;
+let labelContainer = document.getElementById("label");
+let resultContainer = document.getElementById("result");
+let previewContainer = document.getElementById("preview");
 
 async function loadModel() {
-  const modelURL = URL + "model.json";
-  const metadataURL = URL + "metadata.json";
-  model = await tmImage.load(modelURL, metadataURL);
+  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
 }
 
-function startCameraMode() {
-  document.getElementById("mode-selection").style.display = "none";
-  document.getElementById("cameraMode").style.display = "block";
-  initCamera();
-}
-
-function startUploadMode() {
-  document.getElementById("mode-selection").style.display = "none";
-  document.getElementById("uploadMode").style.display = "block";
-  loadModel();
-}
-
-async function initCamera() {
+async function startCamera() {
   await loadModel();
-  webcam = new tmImage.Webcam(224, 224, true);
-  await webcam.setup({ facingMode: currentCamera === 0 ? "environment" : "user" });
+  const flip = useFrontCamera;
+  webcam = new tmImage.Webcam(224, 224, flip);
+  await webcam.setup({ facingMode: flip ? "user" : "environment" });
   await webcam.play();
-  document.getElementById("preview").appendChild(webcam.canvas);
-  window.requestAnimationFrame(loop);
-}
 
-function switchCamera() {
-  currentCamera = currentCamera === 0 ? 1 : 0;
-  if (webcam) {
-    webcam.stop();
-    document.getElementById("preview").innerHTML = "";
-  }
-  initCamera();
+  previewContainer.innerHTML = "";
+  previewContainer.appendChild(webcam.canvas);
+  document.getElementById("switchBtn").style.display = "inline-block";
+
+  window.requestAnimationFrame(loop);
 }
 
 async function loop() {
   webcam.update();
-  await predictFromCamera();
+  await predict(webcam.canvas);
   window.requestAnimationFrame(loop);
 }
 
-async function predictFromCamera() {
-  const prediction = await model.predict(webcam.canvas);
-  const result = prediction.sort((a, b) => b.probability - a.probability)[0];
-  document.getElementById("cameraLabel").innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
-  displayExplanation(result.className, "cameraExplanation");
+async function predict(input) {
+  const prediction = await model.predict(input);
+  const top = prediction.sort((a, b) => b.probability - a.probability)[0];
+
+  labelContainer.innerText = `${top.className} (${(top.probability * 100).toFixed(1)}%)`;
+  resultContainer.innerHTML = getExplanation(top.className);
 }
 
-function handleUpload(input) {
-  const file = input.files[0];
+function handleUpload(event) {
+  const file = event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const img = new Image();
-    img.onload = async function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = 224;
-      canvas.height = 224;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, 224, 224);
-      document.getElementById("uploadPreview").src = e.target.result;
-      const prediction = await model.predict(canvas);
-      const result = prediction.sort((a, b) => b.probability - a.probability)[0];
-      document.getElementById("uploadLabel").innerText = `${result.className} (${(result.probability * 100).toFixed(1)}%)`;
-      displayExplanation(result.className, "uploadExplanation");
-    };
-    img.src = e.target.result;
+  const img = new Image();
+  img.onload = async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 224;
+    canvas.height = 224;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, 224, 224);
+    previewContainer.innerHTML = "";
+    previewContainer.appendChild(canvas);
+
+    await loadModel();
+    await predict(canvas);
   };
-  reader.readAsDataURL(file);
+  img.src = URL.createObjectURL(file);
 }
 
-function displayExplanation(className, containerId) {
-  const data = explanations[className];
-  document.getElementById(containerId).innerHTML = `
-    <strong>Penjelasan:</strong><br>
-    <b>Jenis:</b> ${className}<br>
-    <b>Alasan:</b> ${data.alasan}<br>
-    <b>Manfaat:</b> ${data.manfaat}<br>
-    <b>Pengolahan:</b> ${data.pengolahan}<br>
-    <b>Dampak:</b> ${data.dampak}
-  `;
+function switchCamera() {
+  useFrontCamera = !useFrontCamera;
+  if (webcam) {
+    webcam.stop();
+  }
+  startCamera();
+}
+
+function getExplanation(label) {
+  if (label.toLowerCase().includes("organik")) {
+    return `
+      <p><strong>Jenis:</strong> Sampah Organik</p>
+      <p><strong>Alasan:</strong> Berasal dari bahan alami seperti daun, sisa makanan.</p>
+      <p><strong>Manfaat:</strong> Bisa diolah jadi kompos.</p>
+      <p><strong>Pengolahan:</strong> Komposter, pengomposan manual.</p>
+      <p><strong>Dampak Positif:</strong> Mengurangi limbah, menyuburkan tanah.</p>
+    `;
+  } else {
+    return `
+      <p><strong>Jenis:</strong> Sampah Nonorganik</p>
+      <p><strong>Alasan:</strong> Berasal dari bahan buatan seperti plastik atau logam.</p>
+      <p><strong>Manfaat:</strong> Daur ulang menjadi produk lain.</p>
+      <p><strong>Pengolahan:</strong> Bank sampah, daur ulang pabrik.</p>
+      <p><strong>Dampak Negatif:</strong> Lama terurai, mencemari lingkungan jika tidak dikelola.</p>
+    `;
+  }
 }
