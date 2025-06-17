@@ -1,25 +1,34 @@
 const URL = "./model/";
-let model, webcam, currentStream, useFrontCamera = true;
+let model, webcam, useFrontCamera = true;
 let labelContainer = document.getElementById("label");
 let resultContainer = document.getElementById("result");
 let previewContainer = document.getElementById("preview");
+let fileInput = document.getElementById("uploadInput");
 
+// Pastikan model termuat sebelum digunakan
 async function loadModel() {
-  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+  if (!model) {
+    model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+  }
 }
 
 async function startCamera() {
   await loadModel();
   const flip = useFrontCamera;
   webcam = new tmImage.Webcam(224, 224, flip);
-  await webcam.setup({ facingMode: flip ? "user" : "environment" });
-  await webcam.play();
 
-  previewContainer.innerHTML = "";
-  previewContainer.appendChild(webcam.canvas);
-  document.getElementById("switchBtn").style.display = "inline-block";
+  try {
+    await webcam.setup({ facingMode: flip ? "user" : "environment" });
+    await webcam.play();
 
-  window.requestAnimationFrame(loop);
+    previewContainer.innerHTML = '';
+    previewContainer.appendChild(webcam.canvas);
+    document.getElementById("switchBtn").style.display = "inline-block";
+
+    window.requestAnimationFrame(loop);
+  } catch (error) {
+    alert("Gagal mengakses kamera. Pastikan Anda mengizinkan akses kamera.");
+  }
 }
 
 async function loop() {
@@ -36,9 +45,11 @@ async function predict(input) {
   resultContainer.innerHTML = getExplanation(top.className);
 }
 
-function handleUpload(event) {
+fileInput.addEventListener("change", async (event) => {
   const file = event.target.files[0];
   if (!file) return;
+
+  await loadModel();
 
   const img = new Image();
   img.onload = async () => {
@@ -47,14 +58,13 @@ function handleUpload(event) {
     canvas.height = 224;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, 224, 224);
-    previewContainer.innerHTML = "";
+    previewContainer.innerHTML = '';
     previewContainer.appendChild(canvas);
 
-    await loadModel();
     await predict(canvas);
   };
   img.src = URL.createObjectURL(file);
-}
+});
 
 function switchCamera() {
   useFrontCamera = !useFrontCamera;
@@ -68,18 +78,18 @@ function getExplanation(label) {
   if (label.toLowerCase().includes("organik")) {
     return `
       <p><strong>Jenis:</strong> Sampah Organik</p>
-      <p><strong>Alasan:</strong> Berasal dari bahan alami seperti daun, sisa makanan.</p>
-      <p><strong>Manfaat:</strong> Bisa diolah jadi kompos.</p>
-      <p><strong>Pengolahan:</strong> Komposter, pengomposan manual.</p>
-      <p><strong>Dampak Positif:</strong> Mengurangi limbah, menyuburkan tanah.</p>
+      <p><strong>Alasan:</strong> Berasal dari tumbuhan/hewan, mudah membusuk.</p>
+      <p><strong>Manfaat:</strong> Bisa dijadikan kompos atau pupuk alami.</p>
+      <p><strong>Pengolahan:</strong> Pengomposan rumah atau alat komposter.</p>
+      <p><strong>Dampak Positif:</strong> Ramah lingkungan, menyuburkan tanah.</p>
     `;
   } else {
     return `
       <p><strong>Jenis:</strong> Sampah Nonorganik</p>
-      <p><strong>Alasan:</strong> Berasal dari bahan buatan seperti plastik atau logam.</p>
-      <p><strong>Manfaat:</strong> Daur ulang menjadi produk lain.</p>
-      <p><strong>Pengolahan:</strong> Bank sampah, daur ulang pabrik.</p>
-      <p><strong>Dampak Negatif:</strong> Lama terurai, mencemari lingkungan jika tidak dikelola.</p>
+      <p><strong>Alasan:</strong> Bahan buatan manusia (plastik, logam, kaca).</p>
+      <p><strong>Manfaat:</strong> Bisa didaur ulang atau dijual ke bank sampah.</p>
+      <p><strong>Pengolahan:</strong> Daur ulang, pemrosesan industri.</p>
+      <p><strong>Dampak Negatif:</strong> Sulit terurai, mencemari tanah/air.</p>
     `;
   }
 }
