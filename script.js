@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", function () {
-  const URL = "./model/";
+  const modelURL = "./model/";
   let model, webcam, useFrontCamera = true;
   const labelContainer = document.getElementById("label");
   const resultContainer = document.getElementById("result");
@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
   async function loadModel() {
     if (!model) {
-      model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+      model = await tmImage.load(modelURL + "model.json", modelURL + "metadata.json");
     }
   }
 
