@@ -2,38 +2,29 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Deteksi Sampah Organik vs Nonorganik</title>
+  <title>Sampah Detektor</title>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <script defer src="script.js"></script>
   <style>
-    body { font-family: Arial; text-align: center; background: #f2f2f2; }
-    h1 { margin-top: 20px; }
-    #preview, #uploadPreview { margin: 20px auto; max-width: 100%; }
-    button, input[type="file"] { margin: 10px; }
-    .description { margin-top: 15px; padding: 10px; background: white; border-radius: 10px; display: inline-block; max-width: 90%; text-align: left; }
+    body { font-family: sans-serif; text-align: center; background-color: #f3f3f3; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    #preview img, #preview canvas { width: 224px; height: 224px; margin: 10px auto; }
+    #result { font-weight: bold; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>Deteksi Sampah Organik vs Nonorganik</h1>
-  
-  <div id="mode-selection">
-    <button onclick="startCameraMode()">Gunakan Kamera</button>
-    <button onclick="startUploadMode()">Unggah Gambar</button>
+  <h2>Deteksi Sampah Organik vs Nonorganik</h2>
+
+  <div id="menu">
+    <button onclick="startCamera()">Gunakan Kamera</button>
+    <button onclick="document.getElementById('uploadInput').click()">Unggah Gambar</button>
+    <input type="file" accept="image/*" id="uploadInput" onchange="handleUpload(event)" style="display:none;">
   </div>
 
-  <div id="cameraMode" style="display:none;">
-    <div id="preview"></div>
-    <button onclick="switchCamera()">Ganti Kamera</button>
-    <p id="cameraLabel"></p>
-    <div class="description" id="cameraExplanation"></div>
-  </div>
+  <div id="preview"></div>
+  <div id="label"></div>
+  <div id="result"></div>
 
-  <div id="uploadMode" style="display:none;">
-    <input type="file" accept="image/*" onchange="handleUpload(this)">
-    <br>
-    <img id="uploadPreview" />
-    <p id="uploadLabel"></p>
-    <div class="description" id="uploadExplanation"></div>
-  </div>
+  <button onclick="switchCamera()" id="switchBtn" style="display:none;">Ganti Kamera</button>
 </body>
 </html>
