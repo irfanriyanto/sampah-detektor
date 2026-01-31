@@ -16,65 +16,211 @@
 
   <!-- Gaya Tampilan -->
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
-    h2 {
-      color: #333;
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      backdrop-filter: blur(10px);
     }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #2d3748;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .header p {
+      color: #718096;
+      font-size: 14px;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
     button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    #preview img, #preview canvas, video {
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    #switchBtn {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+    }
+    
+    #switchBtn:hover {
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+    }
+    
+    #preview {
+      background: #f7fafc;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      min-height: 264px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px dashed #cbd5e0;
+    }
+    
+    #preview img, #preview canvas {
       width: 224px;
       height: 224px;
-      margin: 10px auto;
-      border: 2px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      object-fit: cover;
     }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    
     #label {
-      font-size: 18px;
-      margin-top: 10px;
-      color: #2c3e50;
+      font-size: 24px;
+      font-weight: 700;
+      margin: 20px 0 10px;
+      color: #2d3748;
+      text-align: center;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    #result {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: left;
+      border-left: 4px solid #667eea;
+    }
+    
+    #result p {
+      margin: 12px 0;
+      color: #4a5568;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    
+    #result strong {
+      color: #2d3748;
+      font-weight: 600;
+    }
+    
+    .empty-state {
+      color: #a0aec0;
+      font-size: 16px;
+      text-align: center;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 24px;
+      }
+      
+      .header h1 {
+        font-size: 22px;
+      }
+      
+      button {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <h2>Deteksi Sampah Organik vs Nonorganik</h2>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span>🗑️</span>
+        Deteksi Sampah AI
+      </h1>
+      <p>Klasifikasi Sampah Organik & Nonorganik dengan Machine Learning</p>
+    </div>
 
-  <!-- Menu Pilihan -->
-  <div id="menu">
-    <button onclick="startCamera()">Gunakan Kamera</button>
-    <button onclick="document.getElementById('uploadInput').click()">Unggah Gambar</button>
-    <input type="file" accept="image/*" id="uploadInput" style="display: none;">
+    <!-- Menu Pilihan -->
+    <div class="button-group">
+      <button onclick="startCamera()">
+        <span>📸</span>
+        Gunakan Kamera
+      </button>
+      <button onclick="document.getElementById('uploadInput').click()">
+        <span>🖼️</span>
+        Unggah Gambar
+      </button>
+      <input type="file" accept="image/*" id="uploadInput" style="display: none;">
+    </div>
+
+    <!-- Preview Gambar atau Kamera -->
+    <div id="preview">
+      <div class="empty-state">Pilih metode deteksi di atas</div>
+    </div>
+
+    <!-- Tombol Ganti Kamera -->
+    <div class="button-group" id="switchBtnContainer" style="display: none;">
+      <button onclick="switchCamera()" id="switchBtn">
+        <span>🔄</span>
+        Ganti Kamera
+      </button>
+    </div>
+
+    <!-- Hasil Prediksi -->
+    <div id="label"></div>
+    <div id="result"></div>
   </div>
-
-  <!-- Preview Gambar atau Kamera -->
-  <div id="preview">
-    <div id="webcam"></div>
-  </div>
-
-  <!-- Hasil Prediksi -->
-  <div id="label"></div>
-  <div id="result"></div>
-
-  <!-- Tombol Ganti Kamera -->
-  <button onclick="switchCamera()" id="switchBtn" style="display: none;">Ganti Kamera</button>
 </body>
 </html>

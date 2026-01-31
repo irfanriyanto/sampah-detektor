@@ -6,6 +6,7 @@ window.addEventListener("DOMContentLoaded", function () {
   const previewContainer = document.getElementById("preview");
   const fileInput = document.getElementById("uploadInput");
   const switchBtn = document.getElementById("switchBtn");
+  const switchBtnContainer = document.getElementById("switchBtnContainer");
 
   async function loadModel() {
     if (!model) {
@@ -24,7 +25,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
       previewContainer.innerHTML = '';
       previewContainer.appendChild(webcam.canvas);
-      switchBtn.style.display = "inline-block";
+      switchBtnContainer.style.display = "flex";
 
       window.requestAnimationFrame(loop);
     } catch (error) {
